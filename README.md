@@ -5,7 +5,7 @@ Depends on the [HologramAPI](https://github.com/MaximFiedler/HologramAPI)
 https://www.youtube.com/watch?v=5GdkMb59naU
 
 ## Commands
-Just send these commands in chat
+Just send these messages in chat
 - !spawn
 - !bigger
 - !smaller
