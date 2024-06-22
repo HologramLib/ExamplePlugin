@@ -1,6 +1,9 @@
 # ExampleHologramPlugin
 Depends on the [HologramAPI](https://github.com/MaximFiedler/HologramAPI)
 
+## Showcase video
+https://www.youtube.com/watch?v=5GdkMb59naU
+
 ## Commands
 Just send these commands in chat
 - !spawn
