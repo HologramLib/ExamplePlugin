@@ -68,7 +68,7 @@ public final class ExampleHologramPlugin extends JavaPlugin implements Listener 
                 hologram.update();
             }
             case "killall" -> {
-                HologramAPI.getHologram().remove("test");
+                HologramAPI.getHologram().removeAll();
             }
             case "bigger" -> {
                 hologram.setScale(new Vector3F(5,5,5));
