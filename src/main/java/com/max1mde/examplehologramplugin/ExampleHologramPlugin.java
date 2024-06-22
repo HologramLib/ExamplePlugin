@@ -49,7 +49,7 @@ public final class ExampleHologramPlugin extends JavaPlugin implements Listener 
                 HologramAPI.getHologram().spawn(hologram, player.getLocation());
             }
             case "kill" -> {
-                hologram.kill();
+                HologramAPI.getHologram().remove(hologram);
             }
             case "animate" -> {
                 TextAnimation animation = new TextAnimation()
