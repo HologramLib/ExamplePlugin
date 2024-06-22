@@ -1,8 +1,10 @@
-package com.maximfiedler.examplehologramplugin;
+package com.max1mde.examplehologramplugin;
 
-import com.maximfiedler.hologramapi.HologramAPI;
-import com.maximfiedler.hologramapi.hologram.TextAnimation;
-import com.maximfiedler.hologramapi.hologram.TextHologram;
+
+import com.maximde.hologramapi.HologramAPI;
+import com.maximde.hologramapi.hologram.TextAnimation;
+import com.maximde.hologramapi.hologram.TextHologram;
+import com.maximde.hologramapi.utils.Vector3F;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -11,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ExampleHologramPlugin extends JavaPlugin implements Listener {
@@ -35,8 +38,15 @@ public final class ExampleHologramPlugin extends JavaPlugin implements Listener 
     private void onTestCommand(String command, Player player) {
         switch (command) {
             case "spawn" -> {
-                if(hologram != null && hologram.getDisplay() != null) hologram.kill();
-                hologram = spawnHologram(player.getLocation());
+                if(hologram != null && !hologram.isDead()) hologram.kill();
+                hologram = new TextHologram("test_hologram")
+                        .setText(ChatColor.AQUA + "Hello world!")
+                        .setBillboard(Display.Billboard.VERTICAL)
+                        .setShadow(true)
+                        .setScale(2,2,2)
+                        .setTextOpacity((byte) 200)
+                        .setBackgroundColor(Color.fromARGB(0, 255, 236, 222).asARGB());
+                HologramAPI.getHologram().spawn(hologram, player.getLocation());
                 player.sendMessage("spawned");
             }
             case "kill" -> {
@@ -48,40 +58,28 @@ public final class ExampleHologramPlugin extends JavaPlugin implements Listener 
                         .addFrame("Second frame")
                         .addFrame("Third frame\nSecond line")
                         .addFrame("Last frame");
-                HologramAPI.getHologramManager().applyAnimation(this.hologram, animation);
+                HologramAPI.getHologram().applyAnimation(this.hologram, animation);
             }
             case "stopanimation" -> {
-                HologramAPI.getHologramManager().cancelAnimation(this.hologram);
+                HologramAPI.getHologram().cancelAnimation(this.hologram);
             }
             case "killall" -> {
-                HologramAPI.getHologramManager().removeAll("test_hologram");
+                HologramAPI.getHologram().remove("test_hologram");
             }
             case "bigger" -> {
-                hologram.setSize(5,5,5);
+                hologram.setScale(new Vector3F(5,5,5));
                 hologram.update();
             }
             case "smaller" -> {
-                hologram.setSize(0.5F,0.5F,0.5F);
+                hologram.setScale(new Vector3F(0.5F,0.5F,0.5F));
                 hologram.update();
             }
             case "normal" -> {
-                hologram.setSize(1.5F,1.5F,1.5F);
+                hologram.setScale(new Vector3F(1.5F,1.5F,1.5F));
                 hologram.update();
             }
         }
     }
 
 
-    private TextHologram spawnHologram(Location location) {
-        return new TextHologram("test_hologram")
-                .setText(ChatColor.AQUA + "Hello world!")
-                .addLine(ChatColor.RED + "Second line")
-                .addLine(ChatColor.DARK_PURPLE + "Third line")
-                .setBillboard(Display.Billboard.VERTICAL)
-                .setTextShadow(true)
-                .setSize(2,2,2)
-                .setTextOpacity((byte) 200)
-                .setBackgroundColor(Color.fromARGB(0, 255, 236, 222))
-                .spawn(location);
-    }
 }

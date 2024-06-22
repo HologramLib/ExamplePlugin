@@ -1,6 +1,6 @@
 name: ExampleHologramPlugin
 version: '${version}'
-main: com.maximfiedler.examplehologramplugin.ExampleHologramPlugin
+main: com.max1mde.examplehologramplugin.ExampleHologramPlugin
 api-version: 1.19
 depend:
   - HologramAPI
