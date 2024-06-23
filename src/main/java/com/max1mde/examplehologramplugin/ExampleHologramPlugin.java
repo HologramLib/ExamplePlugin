@@ -45,7 +45,7 @@ public final class ExampleHologramPlugin extends JavaPlugin implements Listener 
                         .setShadow(true)
                         .setScale(1.5F,1.5F,1.5F)
                         .setTextOpacity((byte) 200)
-                        .setBackgroundColor(Color.fromARGB(20, 255, 236, 222).asARGB());
+                        .setBackgroundColor(Color.fromARGB(60, 255, 236, 222).asARGB());
                 HologramAPI.getHologram().spawn(hologram, player.getLocation());
             }
             case "kill" -> {
