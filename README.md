@@ -13,6 +13,9 @@ Just send these messages in chat
 - !animate
 - !stopanimation
 - !kill
-- !killall
+- !leaderboard
+- !leaderboard-half
+- !leaderboard-update
+- !passenger
 
 ![image](https://github.com/max1mde/ExampleHologramPlugin/assets/114857048/c1944d95-3787-45b4-98af-c27ded0e3444)
