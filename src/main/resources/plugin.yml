@@ -3,4 +3,4 @@ version: '${version}'
 main: com.max1mde.examplehologramplugin.ExampleHologramPlugin
 api-version: 1.19
 depend:
-  - HologramAPI
+  - HologramLib

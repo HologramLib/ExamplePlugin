@@ -1,10 +1,11 @@
 package com.max1mde.examplehologramplugin;
 
-import com.maximde.hologramapi.HologramAPI;
-import com.maximde.hologramapi.hologram.HologramManager;
-import com.maximde.hologramapi.hologram.TextAnimation;
-import com.maximde.hologramapi.hologram.TextHologram;
-import com.maximde.hologramapi.utils.Vector3F;
+
+import com.maximde.hologramlib.HologramLib;
+import com.maximde.hologramlib.hologram.HologramManager;
+import com.maximde.hologramlib.hologram.TextAnimation;
+import com.maximde.hologramlib.hologram.TextHologram;
+import com.maximde.hologramlib.utils.Vector3F;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
@@ -25,9 +26,9 @@ public final class ExampleHologramPlugin extends JavaPlugin implements Listener 
 
     @Override
     public void onEnable() {
-        hologramManager = HologramAPI.getManager().orElse(null);
+        hologramManager = HologramLib.getManager().orElse(null);
         if (hologramManager == null) {
-            getLogger().severe("Failed to initialize HologramAPI manager. Plugin will not function correctly.");
+            getLogger().severe("Failed to initialize HologramLib manager. Plugin will not function correctly.");
             return;
         }
         getServer().getPluginManager().registerEvents(this, this);
