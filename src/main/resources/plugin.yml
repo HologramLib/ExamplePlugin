@@ -2,5 +2,10 @@ name: ExampleHologramPlugin
 version: '${version}'
 main: com.max1mde.examplehologramplugin.ExampleHologramPlugin
 api-version: 1.19
+folia-supported: true
 depend:
   - HologramLib
+commands:
+  testholos:
+    description: Test hologram functionality
+    usage: /testholos <spawn|remove|list|modify|attach|viewer> [arguments]

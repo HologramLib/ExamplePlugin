@@ -1,28 +1,28 @@
 package com.max1mde.examplehologramplugin;
 
-
+import com.github.retrooper.packetevents.protocol.item.ItemStack;
+import com.github.retrooper.packetevents.protocol.item.type.ItemType;
+import com.github.retrooper.packetevents.protocol.item.type.ItemTypes;
 import com.maximde.hologramlib.HologramLib;
-import com.maximde.hologramlib.hologram.HologramManager;
-import com.maximde.hologramlib.hologram.TextAnimation;
-import com.maximde.hologramlib.hologram.TextHologram;
+import com.maximde.hologramlib.hologram.*;
 import com.maximde.hologramlib.utils.Vector3F;
 import org.bukkit.ChatColor;
-import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+import java.awt.Color;
 
-public final class ExampleHologramPlugin extends JavaPlugin implements Listener {
+public final class ExampleHologramPlugin extends JavaPlugin {
 
-    private TextHologram testHologram;
-    private TextHologram leaderboard;
     private HologramManager hologramManager;
+    private final Map<String, Hologram<?>> activeHolograms = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -31,188 +31,335 @@ public final class ExampleHologramPlugin extends JavaPlugin implements Listener 
             getLogger().severe("Failed to initialize HologramLib manager. Plugin will not function correctly.");
             return;
         }
-        getServer().getPluginManager().registerEvents(this, this);
+
+        Objects.requireNonNull(getCommand("testholos")).setExecutor(new HologramCommand());
     }
 
-    @EventHandler
-    public void onChat(AsyncPlayerChatEvent event) {
-        if (!event.getMessage().startsWith("!")) return;
+    private class HologramCommand implements TabExecutor {
+        private final String[] MAIN_COMMANDS = {
+                "spawn", "remove", "list", "modify", "attach", "viewer"
+        };
 
-        String command = event.getMessage().substring(1).toLowerCase();
-        boolean isCommand = onTestCommand(command, event.getPlayer());
+        private final String[] HOLOGRAM_TYPES = {
+                "text", "item", "block", "leaderboard"
+        };
 
-        if (isCommand) {
-            event.setCancelled(true);
+        private final String[] MODIFY_OPTIONS = {
+                "scale", "translation", "billboard", "text", "item", "block", "glow"
+        };
+
+        private final String[] VIEWER_OPTIONS = {
+                "add", "remove", "clear"
+        };
+
+        @Override
+        public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(ChatColor.RED + "This command can only be used by players!");
+                return true;
+            }
+
+            if (args.length == 0) {
+                sendHelp(player);
+                return true;
+            }
+
+            switch (args[0].toLowerCase()) {
+                case "spawn" -> handleSpawn(player, args);
+                case "remove" -> handleRemove(player, args);
+                case "list" -> handleList(player);
+                case "modify" -> handleModify(player, args);
+                case "attach" -> handleAttach(player, args);
+                case "viewer" -> handleViewer(player, args);
+                default -> sendHelp(player);
+            }
+
+            return true;
         }
-    }
 
-    private boolean onTestCommand(String command, Player player) {
-        if (hologramManager == null) {
-            player.sendMessage(ChatColor.RED + "HologramAPI manager is not initialized.");
-            return false;
-        }
-
-        switch (command) {
-            case "spawn" -> {
-                if (testHologram != null) hologramManager.remove(testHologram);
-
-                testHologram = new TextHologram("test")
-                        .setMiniMessageText("<aqua>Hello world!")
-                        .setSeeThroughBlocks(false)
-                        .setBillboard(Display.Billboard.VERTICAL)
-                        .setShadow(true)
-                        .setScale(1.5F, 1.5F, 1.5F)
-                        .setTextOpacity((byte) 200)
-                        .setBackgroundColor(Color.fromARGB(60, 255, 236, 222).asARGB());
-                hologramManager.spawn(testHologram, player.getLocation());
+        private void handleSpawn(Player player, String[] args) {
+            if (args.length < 3) {
+                player.sendMessage(ChatColor.RED + "Usage: /testholos spawn <type> <id>");
+                return;
             }
 
-            case "passenger" -> {
-                if (testHologram != null) hologramManager.remove(testHologram);
+            String type = args[1].toLowerCase();
+            String id = args[2];
 
-                testHologram = new TextHologram("test")
-                        .setMiniMessageText("<aqua>Passenger hologram!")
-                        .setSeeThroughBlocks(false)
-                        .setBillboard(Display.Billboard.VERTICAL)
-                        .setShadow(true)
-                        .setScale(1.5F, 1.5F, 1.5F)
-                        .setTextOpacity((byte) 200)
-                        .setBackgroundColor(Color.fromARGB(60, 255, 236, 222).asARGB());
-                hologramManager.spawn(testHologram, player.getLocation());
-                hologramManager.attach(testHologram, player.getEntityId());
+            if (activeHolograms.containsKey(id)) {
+                player.sendMessage(ChatColor.RED + "A hologram with that ID already exists!");
+                return;
             }
 
-            case "leaderboard" -> {
-                if (leaderboard != null) hologramManager.remove(leaderboard);
-
-                Map<Integer, String> leaderboardData = new LinkedHashMap<>() {{
-                    put(1, "PlayerOne:1000");
-                    put(2, "PlayerTwo:950");
-                    put(3, "PlayerThree:900");
-                    put(4, "PlayerFour:850");
-                    put(5, "PlayerFive:800");
-                    put(6, "PlayerOne:500");
-                    put(7, "PlayerTwo:400");
-                    put(8, "PlayerThree:300");
-                    put(9, "PlayerFour:200");
-                    put(10, "PlayerFive:100");
-                }};
-
-                leaderboard = hologramManager.generateLeaderboard(
-                        player.getLocation().add(0, 2, 0),
-                        leaderboardData,
-                        HologramManager.LeaderboardOptions.builder()
-                                .title("Top Players")
-                                .suffix("kills")
-                                .titleFormat("<gradient:#ff6000:#ffa42a>▛▀▀▀▀▀▀ {title} ▀▀▀▀▀▀▜</gradient>")
-                                .build()
-                );
-            }
-
-            case "leaderboard-half" -> {
-                if (leaderboard != null) hologramManager.remove(leaderboard);
-
-                Map<Integer, String> leaderboardData = new LinkedHashMap<>() {{
-                    put(1, "PlayerOne:1000");
-                    put(2, "PlayerTwo:950");
-                    put(3, "");
-                    put(4, "");
-                    put(5, "");
-                }};
-
-                leaderboard = hologramManager.generateLeaderboard(
-                        player.getLocation().add(0, 2, 0),
-                        leaderboardData,
-                        HologramManager.LeaderboardOptions.builder()
-                                .title("Top Players")
-                                .titleFormat("<gradient:#ff6000:#ffa42a>▛▀▀▀▀▀▀ {title} ▀▀▀▀▀▀▜</gradient>")
-                                .showEmptyPlaces(true)
-                                .scale(1.2f)
-                                .build()
-                );
-            }
-
-            case "leaderboard-update" -> {
-                if (leaderboard == null) {
-                    player.sendMessage(ChatColor.RED + "No leaderboard exists to update.");
-                    return true;
+            Location loc = player.getLocation();
+            Hologram<?> hologram = switch (type) {
+                case "text" -> {
+                    TextHologram textHolo = new TextHologram(id)
+                            .setMiniMessageText("<gradient:red:blue>Test Text Hologram</gradient>")
+                            .setScale(1.0F, 1.0F, 1.0F)
+                            .setBillboard(Display.Billboard.CENTER);
+                    yield hologramManager.spawn(textHolo, loc);
                 }
-
-                Map<Integer, String> updatedData = new LinkedHashMap<>() {{
-                    put(1, "NewChamp:1200");
-                    put(2, "PlayerOne:1100");
-                    put(3, "PlayerTwo:1050");
-                    put(4, "PlayerThree:1000");
-                    put(5, "PlayerFour:950");
-                }};
-
-                hologramManager.updateLeaderboard(
-                        leaderboard,
-                        updatedData,
-                        HologramManager.LeaderboardOptions.builder()
-                                .title("Updated Rankings")
-                                .build()
-                );
-            }
-
-            case "kill" -> {
-                removeHolograms(testHologram, leaderboard);
-            }
-
-            case "animate" -> {
-                if (testHologram == null) {
-                    player.sendMessage(ChatColor.RED + "No hologram to animate.");
-                    return true;
+                case "item" -> {
+                    ItemHologram itemHolo = new ItemHologram(id)
+                            .setItem(new ItemStack.Builder().type(ItemTypes.DIAMOND_SWORD).build())
+                            .setScale(1.0F, 1.0F, 1.0F)
+                            .setGlowing(true);
+                    itemHolo.setGlowColor(Color.CYAN);
+                    yield hologramManager.spawn(itemHolo, loc);
                 }
-
-                TextAnimation animation = new TextAnimation()
-                        .addFrame("<red>First frame")
-                        .addFrame("<green>Second frame")
-                        .addFrame("Third frame\nSecond line in third frame")
-                        .addFrame("Last frame")
-                        .setDelay(20L)
-                        .setSpeed(20L);
-
-                hologramManager.applyAnimation(testHologram, animation);
-            }
-
-            case "stopanimation" -> {
-                if (testHologram != null) {
-                    hologramManager.cancelAnimation(testHologram);
-                    testHologram.setMiniMessageText("<aqua>Hello world!");
-                    testHologram.update();
+                case "block" -> {
+                    BlockHologram blockHolo = new BlockHologram(id, RenderMode.NEARBY)
+                            .setBlock(Material.DIAMOND_BLOCK.ordinal())
+                            .setScale(1.0F, 1.0F, 1.0F)
+                            .setGlowing(true);
+                    yield hologramManager.spawn(blockHolo, loc);
                 }
-            }
+                case "leaderboard" -> {
+                    Map<Integer, String> leaderboardData = new LinkedHashMap<>() {{
+                        put(1, "MaximDe:1000");
+                        put(2, "dream:950");
+                        put(3, "BastiGHG:500");
+                        put(4, "Wichtiger:400");
+                        // ... more entries
+                    }};
+                    LeaderboardHologram leaderboard = hologramManager.generateLeaderboard(
+                            loc,
+                            leaderboardData,
+                            LeaderboardHologram.LeaderboardOptions.builder()
+                                    .title("Top Players - Kills")
+                                    .showEmptyPlaces(true)
+                                    .scale(1.2f)
+                                    .maxDisplayEntries(10)
+                                    .suffix("kills")
+                                    .topPlayerHead(true)
+                                    .build()
+                    );
+                    yield leaderboard.getTextHologram();
+                }
+                default -> null;
+            };
 
-            case "bigger" -> updateHologramScale(testHologram, new Vector3F(5, 5, 5));
-
-            case "smaller" -> updateHologramScale(testHologram, new Vector3F(0.5F, 0.5F, 0.5F));
-
-            case "normal" -> updateHologramScale(testHologram, new Vector3F(1.5F, 1.5F, 1.5F));
-
-            default -> {
-                return false;
+            if (hologram != null) {
+                activeHolograms.put(id, hologram);
+                player.sendMessage(ChatColor.GREEN + "Spawned " + type + " hologram with ID: " + id);
             }
         }
 
-        player.sendMessage(ChatColor.GREEN + "Command executed successfully!");
-        return true;
-    }
+        private void handleModify(Player player, String[] args) {
+            if (args.length < 4) {
+                player.sendMessage(ChatColor.RED + "Usage: /testholos modify <id> <option> <value>");
+                return;
+            }
 
-    private void removeHolograms(TextHologram... holograms) {
-        if (holograms == null) return;
+            String id = args[1];
+            String option = args[2].toLowerCase();
+            Hologram<?> hologram = activeHolograms.get(id);
 
-        for (TextHologram hologram : holograms) {
+            if (hologram == null) {
+                player.sendMessage(ChatColor.RED + "No hologram found with ID: " + id);
+                return;
+            }
+
+            switch (option) {
+                case "scale" -> {
+                    if (args.length < 5) {
+                        player.sendMessage(ChatColor.RED + "Usage: /testholos modify <id> scale <x> <y> <z>");
+                        return;
+                    }
+                    float x = Float.parseFloat(args[3]);
+                    float y = Float.parseFloat(args[4]);
+                    float z = Float.parseFloat(args[5]);
+                    hologram.setScale(new Vector3F(x, y, z));
+                }
+                case "translation" -> {
+                    if (args.length < 5) {
+                        player.sendMessage(ChatColor.RED + "Usage: /testholos modify <id> translation <x> <y> <z>");
+                        return;
+                    }
+                    float x = Float.parseFloat(args[3]);
+                    float y = Float.parseFloat(args[4]);
+                    float z = Float.parseFloat(args[5]);
+                    hologram.setTranslation(new Vector3F(x, y, z));
+                }
+                case "billboard" -> {
+                    Display.Billboard billboard = Display.Billboard.valueOf(args[3].toUpperCase());
+                    hologram.setBillboard(billboard);
+                }
+                case "text" -> {
+                    if (hologram instanceof TextHologram textHologram) {
+                        String text = String.join(" ", Arrays.copyOfRange(args, 3, args.length));
+                        textHologram.setMiniMessageText(text);
+                    }
+                }
+                case "item" -> {
+                    if (hologram instanceof ItemHologram itemHologram) {
+                        ItemType itemType = ItemTypes.getByName(args[3].toUpperCase());
+                        itemHologram.setItem(new ItemStack.Builder().type(itemType).build());
+                    }
+                }
+                case "block" -> {
+                    if (hologram instanceof BlockHologram blockHologram) {
+                        Material material = Material.valueOf(args[3].toUpperCase());
+                        blockHologram.setBlock(material.ordinal());
+                    }
+                }
+                case "glow" -> {
+                    boolean glow = Boolean.parseBoolean(args[3]);
+                    if (hologram instanceof ItemHologram itemHologram) {
+                        itemHologram.setGlowing(glow);
+                    } else if (hologram instanceof BlockHologram blockHologram) {
+                        blockHologram.setGlowing(glow);
+                    }
+                }
+            }
+
+            hologram.update();
+            player.sendMessage(ChatColor.GREEN + "Modified hologram " + id);
+        }
+
+        private void handleRemove(Player player, String[] args) {
+            if (args.length < 2) {
+                player.sendMessage(ChatColor.RED + "Usage: /testholos remove <id>");
+                return;
+            }
+
+            String id = args[1];
+            Hologram<?> hologram = activeHolograms.remove(id);
+
             if (hologram != null) {
                 hologramManager.remove(hologram);
+                player.sendMessage(ChatColor.GREEN + "Removed hologram with ID: " + id);
+            } else {
+                player.sendMessage(ChatColor.RED + "No hologram found with ID: " + id);
             }
         }
-    }
 
-    private void updateHologramScale(TextHologram hologram, Vector3F scale) {
-        if (hologram == null) return;
+        private void handleList(Player player) {
+            if (activeHolograms.isEmpty()) {
+                player.sendMessage(ChatColor.YELLOW + "No active holograms.");
+                return;
+            }
 
-        hologram.setScale(scale);
-        hologram.update();
+            player.sendMessage(ChatColor.GREEN + "Active holograms:");
+            for (Map.Entry<String, Hologram<?>> entry : activeHolograms.entrySet()) {
+                player.sendMessage(ChatColor.YELLOW + "- " + entry.getKey() + " (" + entry.getValue().getClass().getSimpleName() + ")");
+            }
+        }
+
+        private void handleAttach(Player player, String[] args) {
+            if (args.length < 3) {
+                player.sendMessage(ChatColor.RED + "Usage: /testholos attach <id> <target>");
+                return;
+            }
+
+            String id = args[1];
+            String target = args[2];
+
+            Hologram<?> hologram = activeHolograms.get(id);
+            if (hologram == null) {
+                player.sendMessage(ChatColor.RED + "No hologram found with ID: " + id);
+                return;
+            }
+
+            Player targetPlayer = getServer().getPlayer(target);
+            if (targetPlayer == null) {
+                player.sendMessage(ChatColor.RED + "Target player not found!");
+                return;
+            }
+
+            hologramManager.attach(hologram, targetPlayer.getEntityId());
+            player.sendMessage(ChatColor.GREEN + "Attached hologram to " + target);
+        }
+
+        private void handleViewer(Player player, String[] args) {
+            if (args.length < 4) {
+                player.sendMessage(ChatColor.RED + "Usage: /testholos viewer <id> <add/remove/clear> [player]");
+                return;
+            }
+
+            String id = args[1];
+            String action = args[2].toLowerCase();
+            Hologram<?> hologram = activeHolograms.get(id);
+
+            if (hologram == null) {
+                player.sendMessage(ChatColor.RED + "No hologram found with ID: " + id);
+                return;
+            }
+
+            switch (action) {
+                case "add" -> {
+                    Player target = getServer().getPlayer(args[3]);
+                    if (target != null) {
+                        hologram.addViewer(target);
+                        player.sendMessage(ChatColor.GREEN + "Added " + target.getName() + " as viewer");
+                    }
+                }
+                case "remove" -> {
+                    Player target = getServer().getPlayer(args[3]);
+                    if (target != null) {
+                        hologram.removeViewer(target);
+                        player.sendMessage(ChatColor.GREEN + "Removed " + target.getName() + " as viewer");
+                    }
+                }
+                case "clear" -> {
+                    hologram.removeAllViewers();
+                    player.sendMessage(ChatColor.GREEN + "Cleared all viewers");
+                }
+            }
+            hologram.update();
+        }
+
+        private void sendHelp(Player player) {
+            player.sendMessage(ChatColor.GREEN + "Hologram Test Commands:");
+            player.sendMessage(ChatColor.YELLOW + "/testholos spawn <type> <id> - Spawn a hologram");
+            player.sendMessage(ChatColor.YELLOW + "/testholos remove <id> - Remove a hologram");
+            player.sendMessage(ChatColor.YELLOW + "/testholos list - List all active holograms");
+            player.sendMessage(ChatColor.YELLOW + "/testholos modify <id> <option> <value> - Modify a hologram");
+            player.sendMessage(ChatColor.YELLOW + "/testholos attach <id> <player> - Attach hologram to player");
+            player.sendMessage(ChatColor.YELLOW + "/testholos viewer <id> <add/remove/clear> [player] - Manage viewers");
+        }
+
+        @Override
+        public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+            if (args.length == 1) {
+                return filterStartsWith(Arrays.asList(MAIN_COMMANDS), args[0]);
+            }
+
+            if (args.length == 2) {
+                switch (args[0].toLowerCase()) {
+                    case "spawn":
+                        return filterStartsWith(Arrays.asList(HOLOGRAM_TYPES), args[1]);
+                    case "remove":
+                    case "modify":
+                    case "attach":
+                    case "viewer":
+                        return filterStartsWith(new ArrayList<>(activeHolograms.keySet()), args[1]);
+                }
+            }
+
+            if (args.length == 3) {
+                switch (args[0].toLowerCase()) {
+                    case "modify":
+                        return filterStartsWith(Arrays.asList(MODIFY_OPTIONS), args[2]);
+                    case "viewer":
+                        return filterStartsWith(Arrays.asList(VIEWER_OPTIONS), args[2]);
+                }
+            }
+
+            if (args.length == 4) {
+                if (args[0].equals("viewer") && (args[2].equals("add") || args[2].equals("remove"))) {
+                    return null;
+                }
+            }
+
+            return Collections.emptyList();
+        }
+
+        private List<String> filterStartsWith(List<String> list, String prefix) {
+            return list.stream()
+                    .filter(s -> s.toLowerCase().startsWith(prefix.toLowerCase()))
+                    .toList();
+        }
     }
 }
