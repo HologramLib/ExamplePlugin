@@ -1,5 +1,5 @@
 # ExampleHologramPlugin
-Depends on the [HologramLib](https://github.com/MaximFiedler/HologramLib)
+Depends on the [HologramLib](https://github.com/max1mde/HologramLib)
 
 ## Showcase video
 https://www.youtube.com/watch?v=5GdkMb59naU
