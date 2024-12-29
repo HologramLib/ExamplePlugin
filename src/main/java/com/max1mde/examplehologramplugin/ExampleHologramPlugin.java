@@ -182,6 +182,17 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                     float z = Float.parseFloat(args[5]);
                     hologram.setTranslation(new Vector3F(x, y, z));
                 }
+                case "rotation" -> {
+                    if (args.length < 5) {
+                        player.sendMessage(ChatColor.RED + "Usage: /testholos modify <id> rotation <x> <y> <z> <w>");
+                        return;
+                    }
+                    float x = Float.parseFloat(args[3]);
+                    float y = Float.parseFloat(args[4]);
+                    float z = Float.parseFloat(args[5]);
+                    float w = Float.parseFloat(args[6]);
+                    hologram.setLeftRotation(x, y, z, w);
+                }
                 case "billboard" -> {
                     Display.Billboard billboard = Display.Billboard.valueOf(args[3].toUpperCase());
                     hologram.setBillboard(billboard);

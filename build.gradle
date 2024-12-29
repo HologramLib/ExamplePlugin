@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT"
-    implementation 'com.github.max1mde:HologramLib:1.6.0'
+    compileOnly 'com.github.max1mde:HologramLib:1.6.0'
     compileOnly 'com.github.retrooper:packetevents-spigot:2.7.0'
 }
 
