@@ -45,7 +45,7 @@ public final class ExampleHologramPlugin extends JavaPlugin {
         };
 
         private final String[] MODIFY_OPTIONS = {
-                "scale", "translation", "billboard", "text", "item", "block", "glow"
+                "scale", "translation", "billboard", "text", "item", "block", "glow", "rotation"
         };
 
         private final String[] VIEWER_OPTIONS = {
