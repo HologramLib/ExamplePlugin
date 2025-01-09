@@ -30,6 +30,8 @@ public final class ExampleHologramPlugin extends JavaPlugin {
         if (hologramManager == null) {
             getLogger().severe("Failed to initialize HologramLib manager. Plugin will not function correctly.");
             return;
+        } else {
+            getLogger().info("Successfully initialized HologramLib!");
         }
 
         Objects.requireNonNull(getCommand("testholos")).setExecutor(new HologramCommand());
