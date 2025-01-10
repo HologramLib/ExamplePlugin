@@ -1,8 +1,6 @@
 # ExampleHologramPlugin
 Depends on the [HologramLib](https://github.com/max1mde/HologramLib)
 
-## Showcase video
-https://www.youtube.com/watch?v=5GdkMb59naU
 
 ## Commands
 Use `/testholos` with the following subcommands:
