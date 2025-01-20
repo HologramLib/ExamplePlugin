@@ -5,7 +5,7 @@ Depends on the [HologramLib](https://github.com/max1mde/HologramLib)
 ## Commands
 Use `/testholos` with the following subcommands:
 
-- `/testholos spawn <type> <id>` - Spawn a hologram (types: text, item, block, leaderboard)
+- `/testholos spawn <type> <id>` - Spawn a hologram (types: text, text-viewers, item, block, leaderboard)
 - `/testholos remove <id>` - Remove a hologram
 - `/testholos list` - List all active holograms
 - `/testholos modify <id> <option> <value>` - Modify a hologram
@@ -17,6 +17,10 @@ Use `/testholos` with the following subcommands:
   - Block: `modify <id> block <material>`
   - Glow: `modify <id> glow <true/false>`
 - `/testholos attach <id> <player>` - Attach hologram to player
+
+> [!NOTE]
+> Use `/testholos spawn text-viewers <id>` to test the viewers command below
+
 - `/testholos viewer <id> <add/remove/clear> [player]` - Manage hologram viewers
 
 ![image](https://github.com/max1mde/ExampleHologramPlugin/assets/114857048/c1944d95-3787-45b4-98af-c27ded0e3444)
