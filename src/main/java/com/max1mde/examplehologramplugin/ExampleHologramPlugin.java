@@ -43,7 +43,7 @@ public final class ExampleHologramPlugin extends JavaPlugin {
         };
 
         private final String[] HOLOGRAM_TYPES = {
-                "text", "item", "block", "leaderboard"
+                "text", "text-viewers", "item", "block", "leaderboard"
         };
 
         private final String[] MODIFY_OPTIONS = {
@@ -95,7 +95,16 @@ public final class ExampleHologramPlugin extends JavaPlugin {
 
             Location loc = player.getLocation();
             Hologram<?> hologram = switch (type) {
+                case "text-viewers" -> {
+
+                    TextHologram textHolo = new TextHologram(id, RenderMode.VIEWER_LIST)
+                            .setMiniMessageText("<gradient:red:blue>Test Text Hologram</gradient>")
+                            .setScale(1.0F, 1.0F, 1.0F)
+                            .setBillboard(Display.Billboard.CENTER);
+                    yield hologramManager.spawn(textHolo, loc);
+                }
                 case "text" -> {
+
                     TextHologram textHolo = new TextHologram(id)
                             .setMiniMessageText("<gradient:red:blue>Test Text Hologram</gradient>")
                             .setScale(1.0F, 1.0F, 1.0F)
