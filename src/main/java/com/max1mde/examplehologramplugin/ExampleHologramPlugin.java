@@ -329,7 +329,6 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                     player.sendMessage(ChatColor.GREEN + "Cleared all viewers");
                 }
             }
-            hologram.update();
         }
 
         private void sendHelp(Player player) {
