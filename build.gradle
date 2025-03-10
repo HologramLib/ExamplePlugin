@@ -15,16 +15,14 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
-    maven { url 'https://maven.evokegames.gg/snapshots' }
-    maven { url 'https://repo.codemc.io/repository/maven-releases/' }
-    maven { url 'https://repo.codemc.io/repository/maven-snapshots/' }
     maven { url 'https://jitpack.io' }
+    maven { url 'https://repo.codemc.io/repository/maven-releases/' }
     mavenCentral()
 }
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT"
-    compileOnly "com.github.max1mde:HologramLib:1.7.0"
+    compileOnly "com.github.max1mde:HologramLib:1.7.1"
     compileOnly 'com.github.retrooper:packetevents-spigot:2.7.0'
 }
 
