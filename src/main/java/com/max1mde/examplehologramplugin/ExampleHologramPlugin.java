@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.protocol.item.ItemStack;
 import com.github.retrooper.packetevents.protocol.item.type.ItemType;
 import com.github.retrooper.packetevents.protocol.item.type.ItemTypes;
 import com.maximde.hologramlib.HologramLib;
+import com.maximde.hologramlib.__relocated__.me.tofaa.entitylib.meta.display.ItemDisplayMeta;
 import com.maximde.hologramlib.hologram.*;
 import com.maximde.hologramlib.utils.Vector3F;
 import org.bukkit.ChatColor;
@@ -47,7 +48,7 @@ public final class ExampleHologramPlugin extends JavaPlugin {
         };
 
         private final String[] MODIFY_OPTIONS = {
-                "scale", "translation", "billboard", "text", "item", "block", "glow", "rotation"
+                "scale", "translation", "billboard", "text", "item", "block", "glow", "rotation", "save"
         };
 
         private final String[] VIEWER_OPTIONS = {
@@ -96,7 +97,6 @@ public final class ExampleHologramPlugin extends JavaPlugin {
             Location loc = player.getLocation();
             Hologram<?> hologram = switch (type) {
                 case "text-viewers" -> {
-
                     TextHologram textHolo = new TextHologram(id, RenderMode.VIEWER_LIST)
                             .setMiniMessageText("<gradient:red:blue>Test Text Hologram</gradient>")
                             .setScale(1.0F, 1.0F, 1.0F)
@@ -104,7 +104,6 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                     yield hologramManager.spawn(textHolo, loc);
                 }
                 case "text" -> {
-
                     TextHologram textHolo = new TextHologram(id)
                             .setMiniMessageText("<gradient:red:blue>Test Text Hologram</gradient>")
                             .setScale(1.0F, 1.0F, 1.0F)
@@ -115,6 +114,7 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                     ItemHologram itemHolo = new ItemHologram(id)
                             .setItem(new ItemStack.Builder().type(ItemTypes.DIAMOND_SWORD).build())
                             .setScale(1.0F, 1.0F, 1.0F)
+                            .setDisplayType(ItemDisplayMeta.DisplayType.HEAD)
                             .setGlowing(true);
                     itemHolo.setGlowColor(Color.CYAN);
                     yield hologramManager.spawn(itemHolo, loc);
@@ -132,7 +132,6 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                         put(2, "dream:950");
                         put(3, "BastiGHG:500");
                         put(4, "Wichtiger:400");
-                        // ... more entries
                     }};
                     LeaderboardHologram leaderboard = hologramManager.generateLeaderboard(
                             loc,
@@ -174,7 +173,7 @@ public final class ExampleHologramPlugin extends JavaPlugin {
 
             switch (option) {
                 case "scale" -> {
-                    if (args.length < 5) {
+                    if (args.length < 6) {
                         player.sendMessage(ChatColor.RED + "Usage: /testholos modify <id> scale <x> <y> <z>");
                         return;
                     }
@@ -184,7 +183,7 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                     hologram.setScale(new Vector3F(x, y, z));
                 }
                 case "translation" -> {
-                    if (args.length < 5) {
+                    if (args.length < 6) {
                         player.sendMessage(ChatColor.RED + "Usage: /testholos modify <id> translation <x> <y> <z>");
                         return;
                     }
@@ -194,7 +193,7 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                     hologram.setTranslation(new Vector3F(x, y, z));
                 }
                 case "rotation" -> {
-                    if (args.length < 5) {
+                    if (args.length < 7) {
                         player.sendMessage(ChatColor.RED + "Usage: /testholos modify <id> rotation <x> <y> <z> <w>");
                         return;
                     }
@@ -216,7 +215,7 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                 }
                 case "item" -> {
                     if (hologram instanceof ItemHologram itemHologram) {
-                        ItemType itemType = ItemTypes.getByName(args[3].toUpperCase());
+                        ItemType itemType = ItemTypes.getByName(args[3].toLowerCase());
                         itemHologram.setItem(new ItemStack.Builder().type(itemType).build());
                     }
                 }
@@ -232,6 +231,22 @@ public final class ExampleHologramPlugin extends JavaPlugin {
                         itemHologram.setGlowing(glow);
                     } else if (hologram instanceof BlockHologram blockHologram) {
                         blockHologram.setGlowing(glow);
+                    }
+                }
+                case "save" -> {
+                    boolean save = Boolean.parseBoolean(args[3]);
+                    if (save) {
+                        if (hologramManager.makePersistent(id)) {
+                            player.sendMessage(ChatColor.GREEN + "Hologram " + id + " set to persistent");
+                        } else {
+                            player.sendMessage(ChatColor.RED + "Failed to make hologram " + id + " persistent");
+                        }
+                    } else {
+                        if (hologramManager.removePersistence(id)) {
+                            player.sendMessage(ChatColor.GREEN + "Persistence removed for hologram " + id);
+                        } else {
+                            player.sendMessage(ChatColor.RED + "Failed to remove persistence for hologram " + id);
+                        }
                     }
                 }
             }
@@ -371,6 +386,9 @@ public final class ExampleHologramPlugin extends JavaPlugin {
             if (args.length == 4) {
                 if (args[0].equals("viewer") && (args[2].equals("add") || args[2].equals("remove"))) {
                     return null;
+                }
+                if (args[0].equals("modify") && args[2].equals("save")) {
+                    return Arrays.asList("true", "false");
                 }
             }
 
